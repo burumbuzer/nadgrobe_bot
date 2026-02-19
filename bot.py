@@ -1,6 +1,4 @@
-from telebot.callback_data import CallbackData, CallbackDataFilter
 from telebot import types, TeleBot
-from telebot.custom_filters import AdvancedCustomFilter
 
 from pole import PoleGame
 
@@ -12,14 +10,22 @@ bot = TeleBot(config["Telegram"]["TOKEN"].replace("'", "").replace('"', ''))
 
 CURRENT_GAMES = {}
 
-@bot.message_handler(commands=["start"])
+
+@bot.message_handler(commands=["start", "play"])
 def start_game_handler(message: types.Message):
+  '''
+  Начало игры, отзывается на /start и /play
+  '''
   game = PoleGame()
   CURRENT_GAMES[message.chat.id] = game
   bot.send_message(message.chat.id, text=f"Начало игры!\n\n{game.printWord()}")
 
-@bot.message_handler(content_types=["text"])
+
+@bot.message_handler(func=lambda message: message.chat.id in CURRENT_GAMES, content_types=["text"])
 def process_game_handler(message: types.Message):
+  '''
+  Процесс игры, срабатывает если игра была запущена в этом чате командами выше
+  '''
   if message.chat.id in CURRENT_GAMES:
     game = CURRENT_GAMES[message.chat.id]
   else:
