@@ -63,14 +63,15 @@ def process_game_handler(message: types.Message):
     return
   if len(message.text) == 1:
     if game.check_letter(str.lower(message.text)) and not game.end:
-      bot.send_message(message.chat.id, f"Буква {str.upper(message.text)} есть в слове!\n\n{str.upper(game.print_word())}")
+      bot.send_message(message.chat.id, f"Буква {str.upper(message.text)} есть в слове!\n\n+1 очко\n\n{str.upper(game.print_word())}\n\nТема: {game.theme}")
+      if str.lower(message.text) not in game.guessedLetters: db.change_points(message.from_user.username, message.from_user.id, message.chat.id, 1)
     elif not game.check_letter(str.lower(message.text)):
-      bot.send_message(message.chat.id, f"Буквы {str.upper(message.text)} нет в слове!\n\n-1 очко\n\n{str.upper(game.print_word())}")
+      bot.send_message(message.chat.id, f"Буквы {str.upper(message.text)} нет в слове!\n\n-1 очко\n\n{str.upper(game.print_word())}\n\nТема: {game.theme}")
       db.change_points(message.from_user.username, message.from_user.id, message.chat.id, -1)
   elif len(message.text) > 1:
     if len(str.split(message.text)) == 1:
       if not game.check_word(str.lower(message.text)):
-        bot.send_message(message.chat.id, f"Слово {str.upper(message.text)} неверное!\n\n-2 очка\n\n{str.upper(game.print_word())}")
+        bot.send_message(message.chat.id, f"Слово {str.upper(message.text)} неверное!\n\n-2 очка\n\n{str.upper(game.print_word())}\n\nТема: {game.theme}")
         db.change_points(message.from_user.username, message.from_user.id, message.chat.id, -2)
   if game.end:
     bot.send_message(message.chat.id, f"Конец игры!\n\nЗагаданное слово: {str.upper(game.print_word())}\n\n+15 очков @{message.from_user.username}!")
