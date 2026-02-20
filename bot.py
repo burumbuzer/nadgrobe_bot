@@ -34,7 +34,7 @@ def top_handler(message: types.Message):
   Отравляет топ-15 игроков чата
   '''
   top_list = db.get_top_points(message.chat.id)
-  bot.send_message(chat_id=message.chat.id, text="\n".join(f"@{username}: {points}" for username, points in top_list))
+  bot.send_message(chat_id=message.chat.id, text="Топ-15 игроков чата: \n\n" + "\n".join(f"@{username}: {points}" for username, points in top_list))
 
 
 @bot.message_handler(commands=["start", "play"])
@@ -65,8 +65,8 @@ def process_game_handler(message: types.Message):
     if game.check_letter(str.lower(message.text)) and not game.end:
       bot.send_message(message.chat.id, f"Буква {str.upper(message.text)} есть в слове!\n\n{str.upper(game.print_word())}")
     elif not game.check_letter(str.lower(message.text)):
-      bot.send_message(message.chat.id, f"Буквы {str.upper(message.text)} нет в слове!\n\n{str.upper(game.print_word())}")
-      db.change_points(message.from_user.username, message.from_user.id, message.chat.id, -2)
+      bot.send_message(message.chat.id, f"Буквы {str.upper(message.text)} нет в слове!\n\n-1 очко\n\n{str.upper(game.print_word())}")
+      db.change_points(message.from_user.username, message.from_user.id, message.chat.id, -1)
   elif len(message.text) > 1:
     if len(str.split(message.text)) == 1:
       if not game.check_word(str.lower(message.text)):
