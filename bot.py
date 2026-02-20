@@ -2,12 +2,14 @@ from telebot import types, TeleBot
 from telebot.callback_data import CallbackData, CallbackDataFilter
 
 from pole import *
+from database import GameDatabase
 
 import configparser
 config = configparser.ConfigParser()
 config.read("config.ini")
 
 bot = TeleBot(config["Telegram"]["TOKEN"])
+db = GameDatabase()
 
 CURRENT_GAMES = {}
 
@@ -25,6 +27,14 @@ def dictionaries_keyboard():
         ]
     )
 
+
+@bot.message_handler(commands=["top"])
+def top_handler(message: types.Message):
+  '''
+  Отравляет топ-15 игроков чата
+  '''
+  top_list = db.get_top_points(message.chat.id)
+  bot.send_message(chat_id=message.chat.id, text="\n".join(f"@{username}: {points}" for username, points in top_list))
 
 
 @bot.message_handler(commands=["start", "play"])
@@ -56,14 +66,17 @@ def process_game_handler(message: types.Message):
       bot.send_message(message.chat.id, f"Буква {str.upper(message.text)} есть в слове!\n\n{str.upper(game.print_word())}")
     elif not game.check_letter(str.lower(message.text)):
       bot.send_message(message.chat.id, f"Буквы {str.upper(message.text)} нет в слове!\n\n{str.upper(game.print_word())}")
+      db.change_points(message.from_user.username, message.from_user.id, message.chat.id, -2)
   elif len(message.text) > 1:
     if len(str.split(message.text)) == 1:
       if not game.check_word(str.lower(message.text)):
-        bot.send_message(message.chat.id, f"Слово {str.upper(message.text)} неверное!\n\n{str.upper(game.print_word())}")
+        bot.send_message(message.chat.id, f"Слово {str.upper(message.text)} неверное!\n\n-2 очка\n\n{str.upper(game.print_word())}")
+        db.change_points(message.from_user.username, message.from_user.id, message.chat.id, -2)
   if game.end:
-    bot.send_message(message.chat.id, f"Конец игры!\n\nЗагаданное слово: {str.upper(game.print_word())}\n\nПлюс 52 балла юзеру @{message.from_user.username}!")
+    bot.send_message(message.chat.id, f"Конец игры!\n\nЗагаданное слово: {str.upper(game.print_word())}\n\n+15 очков @{message.from_user.username}!")
+    db.change_points(message.from_user.username, message.from_user.id, message.chat.id, 15)
     del CURRENT_GAMES[message.chat.id]
 
 
-
 bot.infinity_polling()
+del db
