@@ -1,4 +1,5 @@
 from telebot import types, TeleBot
+from telebot.callback_data import CallbackData, CallbackDataFilter
 
 from pole import *
 
@@ -10,15 +11,35 @@ bot = TeleBot(config["Telegram"]["TOKEN"])
 
 CURRENT_GAMES = {}
 
+dictionaries_factory = CallbackData('dict_name', prefix="dict")
+def dictionaries_keyboard():
+  return types.InlineKeyboardMarkup(
+        keyboard=[
+            [
+                types.InlineKeyboardButton(
+                    text=INI_DICTIONARIES[d]["visible_name"],
+                    callback_data=dictionaries_factory.new(dict_name=d)
+                )
+            ]
+            for d in INI_DICTIONARIES
+        ]
+    )
+
+
 
 @bot.message_handler(commands=["start", "play"])
 def start_game_handler(message: types.Message):
   '''
   Начало игры, отзывается на /start и /play
   '''
-  game = PoleGame("test")
-  CURRENT_GAMES[message.chat.id] = game
-  bot.send_message(message.chat.id, text=f"Начало игры!\n\n{game.print_word()}")
+  bot.send_message(message.chat.id, text=f"Начало игры!\n\nВыберите тему", reply_markup=dictionaries_keyboard())
+
+@bot.callback_query_handler(func=None)
+def dictionary_callback(call: types.CallbackQuery):
+  callback_data: dict = dictionaries_factory.parse(callback_data=call.data)
+  game = PoleGame(callback_data['dict_name'])
+  CURRENT_GAMES[call.message.chat.id] = game
+  bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text=f"Начало игры!\n\n{game.print_word()}\n\nТема: {game.theme}")
 
 
 @bot.message_handler(func=lambda message: message.chat.id in CURRENT_GAMES, content_types=["text"])
@@ -30,7 +51,6 @@ def process_game_handler(message: types.Message):
     game = CURRENT_GAMES[message.chat.id]
   else:
     return
-  
   if len(message.text) == 1:
     if game.check_letter(str.lower(message.text)) and not game.end:
       bot.send_message(message.chat.id, f"Буква {str.upper(message.text)} есть в слове!\n\n{str.upper(game.print_word())}")
@@ -40,7 +60,6 @@ def process_game_handler(message: types.Message):
     if len(str.split(message.text)) == 1:
       if not game.check_word(str.lower(message.text)):
         bot.send_message(message.chat.id, f"Слово {str.upper(message.text)} неверное!\n\n{str.upper(game.print_word())}")
-
   if game.end:
     bot.send_message(message.chat.id, f"Конец игры!\n\nЗагаданное слово: {str.upper(game.print_word())}\n\nПлюс 52 балла юзеру @{message.from_user.username}!")
     del CURRENT_GAMES[message.chat.id]
