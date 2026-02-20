@@ -24,7 +24,8 @@ def dictionaries_keyboard():
                 )
             ]
             for d in INI_DICTIONARIES
-        ]
+        ],
+        row_width=2
     )
 
 
