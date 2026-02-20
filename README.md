@@ -1,4 +1,4 @@
-![москвин](https://github.com/burumbuzer/nadgrobe_bot/raw/master/img/moskvin.png)
+[москвин](https://github.com/burumbuzer/nadgrobe_bot/blob/main/img/moskvin.png?raw=true)
 маленький бот на поле чудес для любимой 553 на замену продажному боту извне
 написано (пока что) за один вечер мяу
 
