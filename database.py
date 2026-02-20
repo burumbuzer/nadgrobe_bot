@@ -42,4 +42,4 @@ class GameDatabase():
       return 0
   
   def get_top_points(self, telegram_chat_id: int) -> list:
-    return self.cursor.execute("SELECT username, points FROM Users WHERE telegram_chat_id = ? LIMIT 15 ORDER BY population DESC", (telegram_chat_id, ))
+    return self.cursor.execute("SELECT username, points FROM Users WHERE telegram_chat_id = ? ORDER BY points DESC LIMIT 15", (telegram_chat_id, ))
