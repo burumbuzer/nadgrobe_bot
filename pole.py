@@ -8,7 +8,7 @@ INI_DICTIONARIES = INI_DICTIONARIES._sections
 # Загрузка словарей из файлов
 DICTIONARIES = {}
 for d in INI_DICTIONARIES: 
-  with open(f"dicts\{INI_DICTIONARIES[d]['file']}", "r", encoding="utf-8") as file: # логгер + обработка ошибок
+  with open(f"dicts\\{INI_DICTIONARIES[d]['file']}", "r", encoding="utf-8") as file: # логгер + обработка ошибок
     process_dict = file.readlines()
   process_dict = [w.strip("\n") for w in process_dict]
   DICTIONARIES[d] = process_dict
@@ -46,4 +46,4 @@ class PoleGame():
       return False
     
   def print_word(self) -> str:
-    return "".join(c if c in self.guessedLetters else "■" for c in self.word)
+    return "".join(c if (c in self.guessedLetters or c==" ") else "■" for c in self.word)

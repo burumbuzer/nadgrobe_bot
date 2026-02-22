@@ -70,7 +70,7 @@ def process_game_handler(message: types.Message):
       bot.send_message(message.chat.id, f"Буквы {str.upper(message.text)} нет в слове!\n\n-1 очко\n\n{str.upper(game.print_word())}\n\nТема: {game.theme}")
       db.change_points(message.from_user.username, message.from_user.id, message.chat.id, -1)
   elif len(message.text) > 1:
-    if len(str.split(message.text)) == 1:
+    if (len(str.split(message.text)) == len(str.split(game.word))) and (len(message.text) == len(game.word)):
       if not game.check_word(str.lower(message.text)):
         bot.send_message(message.chat.id, f"Слово {str.upper(message.text)} неверное!\n\n-2 очка\n\n{str.upper(game.print_word())}\n\nТема: {game.theme}")
         db.change_points(message.from_user.username, message.from_user.id, message.chat.id, -2)
